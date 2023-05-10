@@ -1,0 +1,4 @@
+#!/bin/sh
+
+nasm -f elf32 fizzbuzz.asm
+ld -m elf_i386 -s -o fizzbuzz fizzbuzz.o

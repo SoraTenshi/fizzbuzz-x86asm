@@ -1,11 +1,11 @@
 section .data
-        szFizz: db "Fizz", 0xa
+        szFizz: db "Fizz"
         lenFizz equ $ - szFizz
-        szBuzz: db "Buzz", 0xa
+        szBuzz: db "Buzz"
         lenBuzz equ $ - szBuzz
-        szFb: db "FizzBuzz", 0xa
-        lenFb equ $ - szFb
-        asciiBuf db 3
+        szLf: db 0xa
+        lenLf equ $ - szLf
+        asciiBuf db 2
 
 section .text
         global _start
@@ -13,18 +13,8 @@ section .text
 _start:
         push ebp
         mov ebp, esp
-        sub esp, 16 ; 16 byte sized stack
+        sub esp, 4 ; 4 byte sized stack
         mov ecx, 0
-        jmp loop_start
-
-print_fb:
-        push ecx ; push the counter on the stack
-        mov eax, 0x4
-        mov ebx, 0x1
-        lea ecx, [szFb]
-        mov edx, lenFb
-        int 0x80
-        pop ecx ; restore ecx
         jmp loop_start
 
 print_fizz:
@@ -35,7 +25,14 @@ print_fizz:
         mov edx, lenFizz
         int 0x80
         pop ecx ; restore ecx
-        jmp loop_start
+
+        mov eax, ecx
+        mov ebx, 15
+        xor edx, edx ; write into edx
+        div ebx ; edx has remainder
+        cmp edx, 0
+        je print_buzz
+        jmp print_lf
 
 print_buzz:
         push ecx ; push the counter on the stack
@@ -45,7 +42,7 @@ print_buzz:
         mov edx, lenBuzz
         int 0x80
         pop ecx ; restore ecx
-        jmp loop_start
+        jmp print_lf
 
 print_num:
         push ecx ; push the counter on the stack
@@ -67,13 +64,22 @@ single_digit:
 next:
         add edx, '0'
         mov byte[asciiBuf+1], dl
-        mov byte[asciiBuf+2], 0xa
         ; end itoa
 
         mov eax, 0x4
         mov ebx, 0x1
         lea ecx, [asciiBuf]
-        mov edx, 3
+        mov edx, 2
+        int 0x80
+        pop ecx
+        jmp print_lf
+
+print_lf: 
+        push ecx
+        mov eax, 0x4
+        mov ebx, 0x1
+        lea ecx, [szLf]
+        mov edx, lenLf
         int 0x80
         pop ecx
         jmp loop_start
@@ -84,13 +90,6 @@ loop_start:
         je loop_end
 
         ; fizzbuzz compare
-        mov eax, ecx
-        mov ebx, 15
-        xor edx, edx ; write into edx
-        div ebx ; edx has remainder
-        cmp edx, 0
-        je print_fb
-
         ; fizz compare
         mov eax, ecx
         mov ebx, 3
