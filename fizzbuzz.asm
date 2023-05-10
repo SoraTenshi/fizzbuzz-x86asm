@@ -27,7 +27,7 @@ print_fizz:
         pop ecx ; restore ecx
 
         mov eax, ecx
-        mov ebx, 15
+        mov ebx, 5
         xor edx, edx ; write into edx
         div ebx ; edx has remainder
         cmp edx, 0
